@@ -1,10 +1,10 @@
 from pathlib import Path
 from threading import Lock
 
+from crewai.project.crew_loader import load_crew
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from crewai.project.crew_loader import load_crew
 
 ROOT = Path(__file__).resolve().parent.parent
 CREW_DEFINITION = ROOT / "crew.jsonc"
@@ -42,12 +42,18 @@ def run_crew(request: RunRequest) -> RunResponse:
             try:
                 report_html = REPORT_FILE.read_text(encoding="utf-8")
             except FileNotFoundError as exc:
-                raise HTTPException(status_code=500, detail="A crew terminou sem gerar report.html.") from exc
+                raise HTTPException(
+                    status_code=500, detail="A crew terminou sem gerar report.html."
+                ) from exc
             except OSError as exc:
-                raise HTTPException(status_code=500, detail=f"Não foi possível ler report.html: {exc}") from exc
+                raise HTTPException(
+                    status_code=500, detail=f"Não foi possível ler report.html: {exc}"
+                ) from exc
     except HTTPException:
         raise
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Falha ao executar a crew: {exc}") from exc
+        raise HTTPException(
+            status_code=500, detail=f"Falha ao executar a crew: {exc}"
+        ) from exc
 
     return RunResponse(report_html=report_html)
